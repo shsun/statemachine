@@ -24,11 +24,11 @@ __email__ = '89090125@qq.com'
 class State :
 	#
 	# name
-	# handler : callback function which will be fied when entering.
+	# entering_callback : callback function which will be fired when entering.
 	#	
-	def __init__(self, name, handler, max_execute_times=1, is_end_state=False):
+	def __init__(self, name, entering_callback, max_execute_times=1, is_end_state=False):
 		self.name = name
-		self.handler = handler
+		self.entering_callback = entering_callback
 		self.max_execute_times = (1 if max_execute_times < 1 else max_execute_times ) 
 		self.executed_times = 0
 		self.is_end_state = is_end_state
@@ -39,8 +39,8 @@ class FSM :
 		# Hasb used to hold all states
 		self.states = {}
 		# Array used to hold all states which can be end state.
-		self.endStates = []
-		self.startState = None
+		self.end_states = []
+		self.start_state = None
 		#
 		self.on_state_execute_timesout = on_state_execute_timesout
 		self.on_fsm_ended = on_fsm_ended
@@ -49,38 +49,38 @@ class FSM :
 	def add_state(self, state):
 		self.states[state.name] = state
 		if state.is_end_state:
-			self.endStates.append(state.name)
+			self.end_states.append(state.name)
 	
 	# set the start state.
 	# name state name
 	def set_start(self, state):
-		self.startState = state
+		self.start_state = state
 	
 	# 
 	# 
 	# content the parameter what you want to pass to next-state.
 	def run(self, content):
-		print "run ", str(self.startState.name)
-		if self.startState.name in self.states:
-			handler = self.startState.handler
+		print "run ", str(self.start_state.name)
+		if self.start_state.name in self.states:
+			entering_callback = self.start_state.entering_callback
 		else:
-			raise "InitError", ".set_start() has to be called before .run()"
-		if not self.endStates:
-			raise  "InitError", "at least one state must be an end_state"
-		oldState = self.startState
+			raise "InitError", "please call set_start() before call run()"
+		if not self.end_states:
+			raise  "InitError", "the FSM need at least 1 end_state"
+		old_state = self.start_state
 		while 1:
-			(newState, content) = oldState.handler(content, oldState)
-			oldState.executed_times += 1
-			if oldState.executed_times > oldState.max_execute_times : 
-				#print oldState.name, " reached max execute times ", oldState.max_execute_times 
+			(new_state, content) = old_state.entering_callback(content, old_state)
+			old_state.executed_times += 1
+			if old_state.executed_times > old_state.max_execute_times : 
+				#print old_state.name, " reached max execute times ", old_state.max_execute_times 
 				if self.on_state_execute_timesout <> None: 
-					self.on_state_execute_timesout( oldState )
+					self.on_state_execute_timesout( old_state )
 				break;
-			if newState.name in self.endStates:
-				#print "reached ", newState.name, "which is an end state"
+			if new_state.name in self.end_states:
+				#print "reached ", new_state.name, "which is an end state"
 				if self.on_fsm_ended <> None:
-					self.on_fsm_ended( newState )
+					self.on_fsm_ended( new_state )
 				break 
 			else:
-				handler = newState.handler
-			oldState = newState
+				entering_callback = new_state.entering_callback
+			old_state = new_state
