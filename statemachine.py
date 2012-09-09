@@ -52,14 +52,13 @@ class FSM :
 			self.end_states.append(state.name)
 	
 	# set the start state.
-	# name state name
 	def set_start(self, state):
 		self.start_state = state
 	
 	# 
 	# 
-	# content the parameter what you want to pass to next-state.
-	def run(self, content):
+	# parameter the parameter what you want to pass to target-state.
+	def run(self, parameter):
 		print "run ", str(self.start_state.name)
 		if self.start_state.name in self.states:
 			entering_callback = self.start_state.entering_callback
@@ -69,7 +68,7 @@ class FSM :
 			raise  "InitError", "the FSM need at least 1 end_state"
 		old_state = self.start_state
 		while 1:
-			(new_state, content) = old_state.entering_callback(content, old_state)
+			(new_state, parameter) = old_state.entering_callback(parameter, old_state)
 			old_state.executed_times += 1
 			if old_state.executed_times > old_state.max_execute_times : 
 				#print old_state.name, " reached max execute times ", old_state.max_execute_times 
