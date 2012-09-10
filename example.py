@@ -8,7 +8,7 @@ from statemachine import FSM
 # 
 # 
 def on_state_entering(parameters, state):
-	print str(parameters)
+	print str(parameters), 'is_running:', fsm.is_running, ' has_executed:', state.has_executed()
 	if state == ready:
 		time.sleep( 0.5 )
 		# TODO
@@ -55,6 +55,8 @@ def on_fsm_ended( state ) :
 
 
 def main( ):
+	global fsm
+
 	global ready
 	global A0
 	global B
@@ -80,6 +82,8 @@ def main( ):
 	fsm.add_state(D)
 	#
 	fsm.set_start(ready)
+	print 'is_running:', fsm.is_running
+
 	#
 	fsm.run( {"prev_state":None, "message":"let's go"} )
 	#fsm.run("x")

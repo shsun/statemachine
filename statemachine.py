@@ -33,6 +33,8 @@ class State :
 		self.executed_times = 0
 		self.is_end_state = is_end_state
 
+	def has_executed( self ) :
+		return self.executed_times > 0
 
 class FSM :
 	def __init__(self, on_state_execute_timesout=None, on_fsm_ended=None):
@@ -44,6 +46,7 @@ class FSM :
 		#
 		self.on_state_execute_timesout = on_state_execute_timesout
 		self.on_fsm_ended = on_fsm_ended
+		self.is_running = False
 
 	# add state
 	def add_state(self, state):
@@ -54,12 +57,11 @@ class FSM :
 	# set the start state.
 	def set_start(self, state):
 		self.start_state = state
-	
 	# 
 	# 
 	# parameter the parameter what you want to pass to target-state.
 	def run(self, parameter):
-		print "run ", str(self.start_state.name)
+		#print "run ", str(self.start_state.name)
 		if self.start_state.name in self.states:
 			entering_callback = self.start_state.entering_callback
 		else:
@@ -67,18 +69,21 @@ class FSM :
 		if not self.end_states:
 			raise  "InitError", "the FSM need at least 1 end_state"
 		old_state = self.start_state
-		while 1:
+		while 1 :
+			self.is_running = True
 			(new_state, parameter) = old_state.entering_callback(parameter, old_state)
 			old_state.executed_times += 1
 			if old_state.executed_times > old_state.max_execute_times : 
 				#print old_state.name, " reached max execute times ", old_state.max_execute_times 
 				if self.on_state_execute_timesout <> None: 
 					self.on_state_execute_timesout( old_state )
+					self.is_running = False
 				break;
 			if new_state.name in self.end_states:
 				#print "reached ", new_state.name, "which is an end state"
 				if self.on_fsm_ended <> None:
 					self.on_fsm_ended( new_state )
+					self.is_running = False
 				break 
 			else:
 				entering_callback = new_state.entering_callback
