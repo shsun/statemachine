@@ -3,7 +3,6 @@
 import time, random
 from statemachine import State
 from statemachine import FSM
-
 # 
 # 
 # 
